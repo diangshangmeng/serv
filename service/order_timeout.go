@@ -30,7 +30,12 @@ func checkProductTimeout() {
 	now := time.Now()
 
 	var products []model.Product
-	config.DB.Where("status = ?", 4).Find(&products)
+	err := config.DB.Where("status = ?", 4).Find(&products).Error
+	if err != nil {
+		util.GetLogger().Error("query_timeout_products_failed",
+			zap.Error(err),
+		)
+	}
 
 	for _, product := range products {
 		if product.Status == 4 && product.PayTime != nil {
@@ -51,7 +56,12 @@ func checkTimeoutOrders() {
 	var orders []model.Order
 	orders_status := 0 // 0:待支付 1:已支付待确认 2:已完成 3:已取消 4:已超时
 	now := time.Now()
-	config.DB.Where("status = ? AND expired_at <= ?", orders_status, now).Find(&orders)
+	err := config.DB.Where("status = ? AND expired_at <= ?", orders_status, now).Find(&orders).Error
+	if err != nil {
+		util.GetLogger().Error("query_timeout_orders_failed",
+			zap.Error(err),
+		)
+	}
 
 	util.GetLogger().Info("check_timeout_orders_start",
 		util.IntField("found_orders", len(orders)),
@@ -83,30 +93,64 @@ func checkTimeoutOrders() {
 	}
 
 	ctx := context.Background()
-	keys, err := config.RedisClient.Keys(ctx, "order_lock:*").Result()
+	// 使用 SCAN 代替 KEYS 以提高兼容性和性能
+	keys, err := scanRedisKeys(ctx, "order_lock:*")
 	if err != nil {
-		util.GetLogger().Error("get_order_lock_keys_failed",
+		util.GetLogger().Warn("get_order_lock_keys_failed",
 			zap.Error(err),
 		)
-		return
+		// 继续执行，不影响订单超时检查
+	} else {
+		for _, key := range keys {
+			ttl, err := config.RedisClient.TTL(ctx, key).Result()
+			if err != nil {
+				util.GetLogger().Error("get_ttl_failed",
+					util.StringField("key", key),
+					zap.Error(err),
+				)
+				continue
+			}
+
+			if ttl < 0 {
+				orderNo := strings.TrimPrefix(key, "order_lock:")
+				CancelOrder(orderNo)
+			}
+		}
 	}
 
-	for _, key := range keys {
-		ttl, err := config.RedisClient.TTL(ctx, key).Result()
+}
+
+// 使用 SCAN 代替 KEYS 命令，提高兼容性和性能
+func scanRedisKeys(ctx context.Context, pattern string) ([]string, error) {
+	var keys []string
+	var cursor uint64 = 0
+
+	for {
+		var result []string
+		var err error
+		result, cursor, err = config.RedisClient.Scan(ctx, cursor, pattern, 100).Result()
 		if err != nil {
-			util.GetLogger().Error("get_ttl_failed",
-				util.StringField("key", key),
-				zap.Error(err),
-			)
-			continue
+			// 如果 SCAN 命令不支持，回退到 KEYS 命令
+			keysResult, keysErr := config.RedisClient.Keys(ctx, pattern).Result()
+			if keysErr != nil {
+				// 如果都不支持，返回空列表，不影响主流程
+				util.GetLogger().Warn("redis_scan_and_keys_failed",
+					zap.String("pattern", pattern),
+					zap.Error(keysErr),
+				)
+				return []string{}, nil
+			}
+			return keysResult, nil
 		}
 
-		if ttl < 0 {
-			orderNo := strings.TrimPrefix(key, "order_lock:")
-			CancelOrder(orderNo)
+		keys = append(keys, result...)
+
+		if cursor == 0 {
+			break
 		}
 	}
 
+	return keys, nil
 }
 
 func changeProductStatusToAvailable(productID uint64) error {
