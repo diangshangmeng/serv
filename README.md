@@ -521,7 +521,7 @@ sudo systemctl status cloudflared
 ### 5. 验证隧道连接
 ```bash
 # 查看隧道连接状态
-sudo cloudflared tunnel info api-tunnel
+sudo cloudflared tunnel info api-tunnecloudflared tunnel info api-tunnell
 ```
 
 如果显示"Connected"，说明隧道已成功建立。现在你可以通过`https://api.yourdomain.com`访问你的API服务了。
@@ -618,17 +618,3 @@ mysql -u root -p -h 你的服务器IP
 # 测试直接访问Redis（应该失败）
 redis-cli -h 你的服务器IP
 ```
-
-## 七、架构优势总结
-1. **完全隐藏真实IP**：攻击者无法直接攻击你的服务器
-2. **零端口暴露**：除了22端口SSH外，没有任何业务端口开放
-3. **内置DDoS防护**：Cloudflare提供全球DDoS防护能力
-4. **免费SSL证书**：自动生成和续期SSL证书
-5. **细粒度访问控制**：可以基于IP、用户、设备等控制API访问
-6. **全球加速**：Cloudflare全球CDN网络加速API访问
-
-## 八、注意事项
-1. **SSH安全**：虽然只开放了22端口，但仍建议使用密钥认证而非密码认证
-2. **隧道监控**：定期检查Cloudflare Tunnel的运行状态
-3. **日志管理**：Cloudflare提供详细的访问日志，建议定期查看
-4. **备份策略**：继续保持MySQL和Redis的定期备份
