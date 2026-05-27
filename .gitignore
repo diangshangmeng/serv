@@ -1,0 +1,17 @@
+docs
+uploads/
+.trae
+.env
+.env.*
+!.env.example
+docs
+logs
+main
+AGENTS.md
+cmd/cmd
+voucher-platform
+app
+main
+serv
+voucher-platform
+server
