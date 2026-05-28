@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"voucher-platform/service"
 	"voucher-platform/util"
+
+	"go.uber.org/zap"
 )
 
 func SendCode(c *gin.Context) {
@@ -14,6 +16,10 @@ func SendCode(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		util.GetLogger().Error("send_code_validation_failed",
+			util.StringField("error", err.Error()),
+			util.StringField("received_phone", req.Phone),
+		)
 		util.ResponseError(c, http.StatusBadRequest, "手机号格式不正确")
 		return
 	}
@@ -34,6 +40,10 @@ func Register(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		util.GetLogger().Error("register_validation_failed",
+			util.StringField("error", err.Error()),
+			util.StringField("received_phone", req.Phone),
+		)
 		util.ResponseError(c, http.StatusBadRequest, "参数错误：密码需要6-32位，包含大小写字母和数字")
 		return
 	}
@@ -64,9 +74,17 @@ func Login(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		util.GetLogger().Error("login_validation_failed",
+			util.StringField("error", err.Error()),
+			util.StringField("received_phone", req.Phone),
+		)
 		util.ResponseError(c, http.StatusBadRequest, "手机号格式不正确")
 		return
 	}
+
+	util.GetLogger().Info("login_request",
+		zap.String("phone", req.Phone),
+	)
 
 	token, user, err := service.Login(req.Phone, req.Password)
 	if err != nil {
