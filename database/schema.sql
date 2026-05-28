@@ -220,16 +220,9 @@ INSERT INTO `cities` (`name`, `province_id`) VALUES
 ('临沧市', 1);
 
 -- Insert admin user (password: admin123)
--- Password hash: $2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq
+-- Password hash: $2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm
 INSERT INTO `admins` (`username`, `password`) VALUES
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq');
-
--- Insert test users (password: 123456 for all)
--- Password hash: $2a$10$OwnHkiQG1UPtf5AJO5qDeuV98lEUxfylLYAYoL4HBrPJJPEJvcxi
-INSERT INTO `users` (`phone`, `password`, `city_id`, `status`, `auth_status`) VALUES
-('13800138001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeuV98lEUxfylLYAYoL4HBrPJJPEJvcxi', 1, 1, 0),
-('13900139001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeuV98lEUxfylLYAYoL4HBrPJJPEJvcxi', 2, 1, 1),
-('13700137001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeuV98lEUxfylLYAYoL4HBrPJJPEJvcxi', 3, 1, 2);
+('admin', '$2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm');
 
 -- =============================================
 -- Summary

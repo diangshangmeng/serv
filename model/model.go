@@ -185,7 +185,7 @@ func initAdmin() error {
 
 	admin := Admin{
 		Username: "admin",
-		Password: "$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq",
+		Password: "$2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm",
 	}
 
 	return config.DB.Create(&admin).Error

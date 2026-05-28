@@ -112,11 +112,6 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 		return nil, nil, util.NewBizError(util.ErrCodeCannotBuyOwn, "不能购买自己的商品")
 	}
 
-	seller, err := repository.GetUserByID(uint64(product.OwnerID))
-	if err != nil {
-		return nil, nil, err
-	}
-
 	tx := config.DB.Begin()
 
 	product.Status = 2
@@ -160,5 +155,5 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 	}
 
 	ConvertOrderImageURLs(order)
-	return order, seller, nil
+	return order, nil, nil
 }
