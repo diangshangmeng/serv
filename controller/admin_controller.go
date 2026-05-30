@@ -68,6 +68,27 @@ func AdminLogin(c *gin.Context) {
 	util.ResponseSuccess(c, result)
 }
 
+func UpdateAdminPassword(c *gin.Context) {
+	adminID := c.MustGet("adminID").(uint64)
+
+	var req struct {
+		OldPassword string `json:"old_password" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		util.ResponseError(c, 400, "参数错误")
+		return
+	}
+
+	if err := service.UpdateAdminPassword(adminID, req.OldPassword, req.NewPassword); err != nil {
+		util.ResponseBizError(c, err)
+		return
+	}
+
+	util.ResponseMessage(c, "密码修改成功")
+}
+
 func GetPendingUsers(c *gin.Context) {
 	users, err := service.GetPendingUsers()
 	if err != nil {

@@ -427,28 +427,6 @@ func SellerCancelOrder(orderNo string, sellerPhone string) error {
 
 	tx := config.DB.Begin()
 
-	product, err := repository.GetProductByID(uint64(order.ProductID))
-	if err != nil {
-		util.GetLogger().Error("SellerCancelOrder - 获取商品失败", zap.Error(err),
-			util.StringField("order_no", orderNo),
-			zap.Uint("product_id", order.ProductID))
-		tx.Rollback()
-		return err
-	}
-	product.Status = 1
-	err = tx.Save(product).Error
-	if err != nil {
-		util.GetLogger().Error("SellerCancelOrder - 更新商品状态失败", zap.Error(err),
-			util.StringField("order_no", orderNo),
-			zap.Uint("product_id", product.ID))
-		tx.Rollback()
-		return err
-	}
-	util.GetLogger().Info("SellerCancelOrder - 更新商品状态成功",
-		util.StringField("order_no", orderNo),
-		zap.Uint("product_id", product.ID),
-		util.IntField("new_status", 1))
-
 	now := time.Now()
 	order.Status = ORDER_STATUS_UNPAID
 	order.ExpiredAt = now.Add(15 * time.Minute)

@@ -22,3 +22,7 @@ func GetAdminByID(id uint64) (*model.Admin, error) {
 	}
 	return &admin, nil
 }
+
+func UpdateAdmin(admin *model.Admin) error {
+	return config.DB.Save(admin).Error
+}

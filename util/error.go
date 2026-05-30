@@ -35,6 +35,7 @@ const (
 	ErrCodeNoPermission      = 4003
 
 	ErrCodeAdminAuthFailed   = 5001
+	ErrCodeAdminNotFound     = 5002
 
 	ErrCodeImageNotFound     = 6001
 	ErrCodeImageAlreadyUsed  = 6002

@@ -36,6 +36,7 @@ func InitRouter(r *gin.Engine) {
 	admin.Use(middleware.AdminRateLimit())
 	admin.Use(middleware.AdminJWTMiddleware())
 	{
+		admin.POST("/password/update", controller.UpdateAdminPassword)
 		admin.GET("/user/pending", controller.GetPendingUsers)
 		admin.POST("/user/audit", controller.AuditUser)
 		admin.GET("/user/list", controller.GetAllUsers)

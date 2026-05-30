@@ -25,6 +25,42 @@ func AdminLogin(username, password string) (string, error) {
 	return util.GenerateAdminToken(uint64(admin.ID), admin.Username)
 }
 
+func UpdateAdminPassword(adminID uint64, oldPassword, newPassword string) error {
+	log.Printf("[UpdateAdminPassword] 开始修改管理员密码，admin_id=%d", adminID)
+	
+	admin, err := repository.GetAdminByID(adminID)
+	if err != nil {
+		log.Printf("[UpdateAdminPassword] 管理员不存在，admin_id=%d, err=%v", adminID, err)
+		return util.NewBizError(util.ErrCodeAdminNotFound, "管理员不存在")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(oldPassword))
+	if err != nil {
+		log.Printf("[UpdateAdminPassword] 旧密码不正确，admin_id=%d, err=%v", adminID, err)
+		return util.NewBizError(util.ErrCodeAdminAuthFailed, "旧密码不正确")
+	}
+
+	if len(newPassword) < 6 {
+		return util.NewBizError(util.ErrCodeParamInvalid, "新密码长度不能少于6位")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("[UpdateAdminPassword] 密码加密失败，admin_id=%d, err=%v", adminID, err)
+		return err
+	}
+
+	admin.Password = string(hashedPassword)
+	err = repository.UpdateAdmin(admin)
+	if err != nil {
+		log.Printf("[UpdateAdminPassword] 更新管理员密码失败，admin_id=%d, err=%v", adminID, err)
+		return err
+	}
+
+	log.Printf("[UpdateAdminPassword] 管理员密码修改成功，admin_id=%d", adminID)
+	return nil
+}
+
 func GetPendingUsers() ([]model.User, error) {
 	users, err := repository.GetPendingUsers()
 	if err != nil {
