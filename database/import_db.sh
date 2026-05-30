@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # 配置
-DB_HOST="localhost"
-DB_PORT="3306"
-DB_USER="dsm_user"
-DB_PASSWORD="asdf3asRDSfEre4DAS79"
-DB_NAME="dsm"
+DB_HOST=39.98.154.93
+DB_PORT=3306
+DB_USER=malldev
+DB_PASSWORD=m!#$alI2024Dev
+DB_NAME=feimall
 
 echo "开始导入数据库..."
 
