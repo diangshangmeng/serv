@@ -47,7 +47,7 @@ func LoadConfig() error {
 		ServerPort:         getEnv("SERVER_PORT", "8080"),
 		ServerHost:         getEnv("SERVER_HOST", "localhost"),
 		ServerURL:          getEnv("SERVER_URL", "https://api.dianshangmeng.tech"),
-		ServerImageURL:     getEnv("SERVER_IMAGE_URL", "https://api.dianshangmeng.tech/"),
+		ServerImageURL:     getEnv("SERVER_IMAGE_URL", "https://api.dianshangmeng.tech"),
 		DBHost:             getEnv("DB_HOST", "localhost"),
 		DBPort:             getEnv("DB_PORT", "3306"),
 		DBUser:             getEnv("DB_USER", "dsm_user"),
