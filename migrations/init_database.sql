@@ -209,14 +209,7 @@ INSERT IGNORE INTO `cities` (`id`, `name`, `province_id`) VALUES
 -- 用户名: admin
 -- 密码: admin123 (BCRYPT加密)
 INSERT IGNORE INTO `admins` (`id`, `username`, `password`) VALUES
-(1, 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq');
-
--- 插入测试用户
--- 密码都是: 123456 (BCRYPT加密)
-INSERT IGNORE INTO `users` (`id`, `phone`, `password`, `city_id`, `status`, `auth_status`, `audit_remark`, `id_card_front`, `id_card_back`, `business_license`, `payment_code`) VALUES
-(1, '13800138001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi', 1, 1, 0, '', '', '', '', ''),
-(2, '13900139001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi', 2, 1, 1, '', '/uploads/auth/2_id_card_front.png', '/uploads/auth/2_id_card_back.png', '/uploads/auth/2_business_license.png', '/uploads/auth/2_payment_code.png'),
-(3, '13700137001', '$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi', 3, 1, 2, '', '/uploads/auth/3_id_card_front.png', '/uploads/auth/3_id_card_back.png', '/uploads/auth/3_business_license.png', '/uploads/auth/3_payment_code.png');
+(1, 'admin', '$2a$10$kj1dClEJF9gbL6axUER.PeYNajymob4cI9r/I9YxPiiIYsFjGyp4q');
 
 -- ============================================
 -- 完成提示

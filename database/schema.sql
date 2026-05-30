@@ -222,7 +222,7 @@ INSERT INTO `cities` (`name`, `province_id`) VALUES
 -- Insert admin user (password: admin123)
 -- Password hash: $2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm
 INSERT INTO `admins` (`username`, `password`) VALUES
-('admin', '$2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm');
+('admin', '$2a$10$kj1dClEJF9gbL6axUER.PeYNajymob4cI9r/I9YxPiiIYsFjGyp4q');
 
 -- =============================================
 -- Summary

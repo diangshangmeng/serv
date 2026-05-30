@@ -3,16 +3,17 @@ package model
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"voucher-platform/config"
+
+	"github.com/jinzhu/gorm"
 )
 
 // AuthStatus constants
 const (
 	AuthStatusUnverified = 0 // 未验证状态
-	AuthStatusPending   = 1 // 等待后台管理员进行验证
-	AuthStatusApproved  = 2 // 通过后台管理验证状态
-	AuthStatusRejected  = 3 // 认证驳回
+	AuthStatusPending    = 1 // 等待后台管理员进行验证
+	AuthStatusApproved   = 2 // 通过后台管理验证状态
+	AuthStatusRejected   = 3 // 认证驳回
 )
 
 type User struct {
@@ -53,18 +54,18 @@ type Listing struct {
 
 type Order struct {
 	gorm.Model
-	OrderNo             string    `gorm:"unique;not null"`
-	ProductID           uint      `gorm:"index"`
+	OrderNo             string `gorm:"unique;not null"`
+	ProductID           uint   `gorm:"index"`
 	ProductTitle        string
 	ProductDescription  string
 	SellerID            uint
 	SellerPhone         string
-	ProductImageURL     string    `gorm:"size:2048"`
-	PaymentCodeImageURL string    `gorm:"size:2048"`
-	BuyerID             uint      `gorm:"index"`
+	ProductImageURL     string `gorm:"size:2048"`
+	PaymentCodeImageURL string `gorm:"size:2048"`
+	BuyerID             uint   `gorm:"index"`
 	BuyerPhone          string
-	PaymentVoucher      string    `gorm:"size:2048"`
-	Status              int       `gorm:"default:0"`
+	PaymentVoucher      string `gorm:"size:2048"`
+	Status              int    `gorm:"default:0"`
 	Price               int64
 	ExpiredAt           time.Time
 	OrderTime           *time.Time
@@ -82,7 +83,7 @@ type ProductImage struct {
 	Name     string
 	FileName string
 	Tags     string
-	IsUsed   bool  `gorm:"default:false"`
+	IsUsed   bool `gorm:"default:false"`
 	AdminID  uint
 	Size     int64
 }
@@ -107,7 +108,7 @@ type Product struct {
 	OwnerPhone      string
 	DisplayImageURL string `gorm:"size:2048"`
 	PaymentImageURL string `gorm:"size:2048"`
-	Status          int `gorm:"default:0"`
+	Status          int    `gorm:"default:0"`
 	PayTime         *time.Time
 	LockReason      string
 	CityID          uint `gorm:"index"`
@@ -136,11 +137,6 @@ func AutoMigrate() error {
 	}
 
 	err = initAdmin()
-	if err != nil {
-		return err
-	}
-
-	err = initTestUsers()
 	if err != nil {
 		return err
 	}
@@ -185,63 +181,8 @@ func initAdmin() error {
 
 	admin := Admin{
 		Username: "admin",
-		Password: "$2a$10$x6WvZYaHlmtBxdnbvlphNuXC9DWKw7uvawkgwzjiN4IIh8r3dX.hm",
+		Password: "$2a$10$kj1dClEJF9gbL6axUER.PeYNajymob4cI9r/I9YxPiiIYsFjGyp4q",
 	}
 
 	return config.DB.Create(&admin).Error
-}
-
-func initTestUsers() error {
-	var count int
-	config.DB.Model(&User{}).Count(&count)
-	if count > 0 {
-		return nil
-	}
-
-	testUsers := []User{
-		{
-			Phone:           "13800138001",
-			Password:        "$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi",
-			CityID:          1,
-			Status:          1,
-			AuthStatus:      AuthStatusUnverified,
-			AuditRemark:     "",
-			IDCardFront:     "",
-			IDCardBack:      "",
-			BusinessLicense: "",
-			PaymentCode:     "",
-		},
-		{
-			Phone:           "13900139001",
-			Password:        "$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi",
-			CityID:          2,
-			Status:          1,
-			AuthStatus:      AuthStatusPending,
-			AuditRemark:     "",
-			IDCardFront:     "/uploads/auth/2_id_card_front.png",
-			IDCardBack:      "/uploads/auth/2_id_card_back.png",
-			BusinessLicense: "/uploads/auth/2_business_license.png",
-			PaymentCode:     "/uploads/auth/2_payment_code.png",
-		},
-		{
-			Phone:           "13700137001",
-			Password:        "$2a$10$OwnHkiQG1UPtf5AJO5qDeu0V98lEUxfylLYAYoL4HBrPJJPEJvcxi",
-			CityID:          3,
-			Status:          1,
-			AuthStatus:      AuthStatusApproved,
-			AuditRemark:     "",
-			IDCardFront:     "/uploads/auth/3_id_card_front.png",
-			IDCardBack:      "/uploads/auth/3_id_card_back.png",
-			BusinessLicense: "/uploads/auth/3_business_license.png",
-			PaymentCode:     "/uploads/auth/3_payment_code.png",
-		},
-	}
-
-	for _, user := range testUsers {
-		if err := config.DB.Create(&user).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
