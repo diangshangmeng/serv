@@ -10,8 +10,8 @@ import (
 
 type UploadRequest struct {
 	ImageType string `form:"image_type"`
-	UserID   uint64 `form:"user_id"`
-	OrderNo  string `form:"order_no"`
+	UserID    uint64 `form:"user_id"`
+	OrderNo   string `form:"order_no"`
 }
 
 func UploadImage(c *gin.Context) {
@@ -67,11 +67,11 @@ func UploadAuthImage(c *gin.Context) {
 		return
 	}
 
-	userID := c.MustGet("userID").(uint64)
+	phone := c.MustGet("phone").(string)
 
 	opts := service.UploadOptions{
 		ImageType: req.ImageType,
-		UserID:    userID,
+		Phome:     phone, // 使用手机号作为用户标识，避免暴露用户ID
 	}
 
 	result, err := service.UploadImage(file, opts)

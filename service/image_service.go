@@ -14,21 +14,22 @@ import (
 
 // ImageType 图片类型枚举
 const (
-	ImageTypeIDCardFront     = "id_card_front"
-	ImageTypeIDCardBack      = "id_card_back"
-	ImageTypeBusinessLicense = "business_license"
-	ImageTypePaymentCode     = "payment_code"
-	ImageTypePaymentVoucher  = "payment_voucher"
-	ImageTypeProductImage    = "product_image"
+	ImageTypeIDCardFront      = "id_card_front"
+	ImageTypeIDCardBack       = "id_card_back"
+	ImageTypeBusinessLicense  = "business_license"
+	ImageTypePaymentCode      = "payment_code"
+	ImageTypePaymentVoucher   = "payment_voucher"
+	ImageTypeProductImage     = "product_image"
 	ImageTypeAdminPaymentCode = "admin_payment_code"
 )
 
 // UploadOptions 上传选项
 type UploadOptions struct {
-	ImageType string
-	UserID    uint64
-	AdminID   uint
-	OrderNo   string
+	ImageType   string
+	UserID      uint64
+	Phome       string
+	AdminID     uint
+	OrderNo     string
 	CompanyName string
 }
 
@@ -189,10 +190,10 @@ func getUploadPathAndName(opts UploadOptions, ext string) (string, string, error
 
 	switch opts.ImageType {
 	case ImageTypeIDCardFront, ImageTypeIDCardBack, ImageTypeBusinessLicense, ImageTypePaymentCode:
-		if opts.UserID == 0 {
+		if opts.Phome == "" {
 			return "", "", util.NewBizError(util.ErrCodeParamInvalid, "缺少用户ID")
 		}
-		uploadPath := filepath.Join(config.AppConfig.ImageUploadPath, fmt.Sprintf("%d", opts.UserID), "auth")
+		uploadPath := filepath.Join(config.AppConfig.ImageUploadPath, fmt.Sprintf("%s", opts.Phome), "auth")
 		fileName := fmt.Sprintf("%s%s", opts.ImageType, ext)
 		return uploadPath, fileName, nil
 
@@ -200,7 +201,7 @@ func getUploadPathAndName(opts UploadOptions, ext string) (string, string, error
 		if opts.OrderNo == "" {
 			return "", "", util.NewBizError(util.ErrCodeParamInvalid, "缺少订单号")
 		}
-		uploadPath := filepath.Join(config.AppConfig.ImageUploadPath, opts.OrderNo, "order")
+		uploadPath := filepath.Join(config.AppConfig.ImageUploadPath+"/orders", opts.OrderNo, "order")
 		fileName := fmt.Sprintf("%s_%s%s", opts.OrderNo, timestamp, ext)
 		return uploadPath, fileName, nil
 
