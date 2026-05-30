@@ -107,6 +107,10 @@ func CloseExpiredOrders() error {
 		}
 
 		tx.Commit()
+		
+		// 更新商品详情缓存，清除列表缓存
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
 	}
 
 	return nil
@@ -381,6 +385,11 @@ func ConfirmOrder(orderNo string, sellerPhone string) error {
 	config.RedisClient.Del(ctx, redisKey)
 
 	tx.Commit()
+	
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
+	
 	util.GetLogger().Info("ConfirmOrder - 确认订单成功",
 		util.StringField("order_no", orderNo),
 		util.StringField("seller_phone", sellerPhone))
@@ -512,6 +521,10 @@ func CancelOrder(orderNo string) error {
 	config.RedisClient.Del(ctx, redisKey)
 
 	tx.Commit()
+	
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
 	return nil
 }
 

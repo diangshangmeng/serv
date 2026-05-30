@@ -11,23 +11,51 @@ import (
 func CreateProduct(product *model.Product, adminID uint, adminPhone string) error {
 	product.OwnerID = adminID
 	product.OwnerPhone = adminPhone
-	return repository.CreateProduct(product)
+	err := repository.CreateProduct(product)
+	if err == nil {
+		ClearProductListCache()
+	}
+	return err
 }
 
 func GetProductByID(id uint64) (*model.Product, error) {
+	// 先从缓存读取
+	cachedProduct, err := GetProductDetailFromCache(id)
+	if err == nil && cachedProduct != nil {
+		ConvertProductImageURLs(cachedProduct)
+		return cachedProduct, nil
+	}
+
+	// 缓存未命中，从数据库读取
 	product, err := repository.GetProductByID(id)
 	if err != nil {
 		return nil, err
 	}
+
+	// 写入缓存
+	_ = SetProductDetailToCache(product)
+
 	ConvertProductImageURLs(product)
 	return product, nil
 }
 
 func GetProductList(page int, pageSize int, cityID *uint) ([]model.Product, int64, error) {
+	// 先从缓存读取
+	cached, err := GetProductListFromCache(page, pageSize, cityID)
+	if err == nil && cached != nil {
+		ConvertProductsImageURLs(cached.List)
+		return cached.List, cached.Total, nil
+	}
+
+	// 缓存未命中，从数据库读取
 	list, total, err := repository.GetProductList(page, pageSize, cityID)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	// 写入缓存
+	_ = SetProductListToCache(list, total, page, pageSize, cityID)
+
 	ConvertProductsImageURLs(list)
 	return list, total, nil
 }
@@ -42,7 +70,12 @@ func GetProductListForDashboard(page int, pageSize int, cityID *uint) ([]model.P
 }
 
 func UpdateProduct(product *model.Product) error {
-	return repository.UpdateProduct(product)
+	err := repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func DeleteProduct(id uint64, adminPhone string) error {
@@ -53,7 +86,12 @@ func DeleteProduct(id uint64, adminPhone string) error {
 	if product.OwnerPhone != adminPhone {
 		return util.NewBizError(util.ErrCodeProductNoPermission, "无权删除此商品")
 	}
-	return repository.DeleteProduct(id)
+	err = repository.DeleteProduct(id)
+	if err == nil {
+		ClearProductDetailCache(id)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func UpdateProductStatus(productID uint64, status int) error {
@@ -62,7 +100,12 @@ func UpdateProductStatus(productID uint64, status int) error {
 		return util.NewBizError(util.ErrCodeProductNotFound, "商品不存在")
 	}
 	product.Status = status
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func GetProductStatus(productID uint64) (int, error) {
@@ -80,7 +123,12 @@ func SetProductStatusLock(productID uint64, reason string) error {
 	}
 	product.Status = 2
 	product.LockReason = reason
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func ResetProductToAvailable(productID uint64) error {
@@ -91,7 +139,12 @@ func ResetProductToAvailable(productID uint64) error {
 	product.Status = 0
 	product.PayTime = nil
 	product.LockReason = ""
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func PublishProduct(productID uint64) error {
@@ -102,7 +155,12 @@ func PublishProduct(productID uint64) error {
 	product.Status = 1
 	product.PayTime = nil
 	product.LockReason = ""
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func UnpublishProduct(productID uint64, reason string) error {
@@ -113,7 +171,12 @@ func UnpublishProduct(productID uint64, reason string) error {
 	product.Status = 0
 	product.PayTime = nil
 	product.LockReason = reason
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func UnlockProduct(productID uint64) error {
@@ -124,7 +187,12 @@ func UnlockProduct(productID uint64) error {
 	product.Status = 0
 	product.PayTime = nil
 	product.LockReason = ""
-	return repository.UpdateProduct(product)
+	err = repository.UpdateProduct(product)
+	if err == nil {
+		_ = SetProductDetailToCache(product)
+		ClearProductListCache()
+	}
+	return err
 }
 
 func GetMyProducts(ownerPhone string, page int, pageSize int, cityID *uint) ([]*model.Product, int64, error) {
@@ -173,5 +241,8 @@ func AppPublishProduct(productID uint64, ownerPhone string) error {
 	}
 
 	log.Printf("[AppPublishProduct] 上架成功，productID=%d", productID)
+	
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
 	return nil
 }

@@ -34,6 +34,10 @@ func PlaceOrder(productID uint64, userID uint64, userPhone string) error {
 		return err
 	}
 
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
+
 	return nil
 }
 
@@ -55,6 +59,10 @@ func CompleteProductPayment(productID uint64) error {
 		return err
 	}
 
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
+
 	return nil
 }
 
@@ -75,6 +83,10 @@ func ConfirmProductOrder(productID uint64) error {
 		return err
 	}
 
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
+
 	return nil
 }
 
@@ -94,6 +106,10 @@ func CancelProductOrder(productID uint64, reason string) error {
 	if err := repository.UpdateProduct(product); err != nil {
 		return err
 	}
+
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
 
 	return nil
 }
@@ -153,6 +169,10 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 		logger.Error("提交事务失败", zap.Error(err), zap.String("order_no", orderNo))
 		return nil, nil, err
 	}
+
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
 
 	ConvertOrderImageURLs(order)
 	return order, nil, nil
