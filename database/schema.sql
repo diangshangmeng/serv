@@ -128,6 +128,8 @@ CREATE TABLE `products` (
   `pay_time` datetime(3) DEFAULT NULL COMMENT '支付时间',
   `lock_reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '锁定原因',
   `city_id` bigint unsigned DEFAULT NULL COMMENT '城市ID',
+  `version` int DEFAULT '0' COMMENT '乐观锁版本号',
+  `last_transaction_price` bigint DEFAULT '0' COMMENT '上次交易价格（分），用于防篡改',
   PRIMARY KEY (`id`),
   KEY `idx_products_deleted_at` (`deleted_at`),
   KEY `idx_products_city_id` (`city_id`),

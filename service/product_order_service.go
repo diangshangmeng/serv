@@ -31,10 +31,10 @@ func PlaceOrder(productID uint64, userID uint64, userPhone string) error {
 	product.OwnerID = uint(userID)
 
 	if err := repository.UpdateProduct(product); err != nil {
-		return err
+		logger.Error("更新商品状态失败", zap.Error(err), zap.Uint64("product_id", productID))
+		return util.NewBizError(util.ErrCodeProductUnavailable, "商品已被其他用户购买")
 	}
 
-	// 更新商品详情缓存，清除列表缓存
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
 
@@ -76,16 +76,22 @@ func ConfirmProductOrder(productID uint64) error {
 		return util.NewBizError(util.ErrCodeProductStatusError, "商品状态不正确")
 	}
 
+	// 保存当前订单价格，用于更新 last_transaction_price
+	currentPrice := product.Price
+
 	product.Status = 0
 	product.PayTime = nil
+	product.LastTransactionPrice = currentPrice
 
 	if err := repository.UpdateProduct(product); err != nil {
+		logger.Error("更新商品状态失败", zap.Error(err), zap.Uint64("product_id", productID))
 		return err
 	}
 
 	// 更新商品详情缓存，清除列表缓存
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
+	ClearMyProductsCache(product.OwnerPhone)
 
 	return nil
 }
@@ -131,11 +137,10 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 	tx := config.DB.Begin()
 
 	product.Status = 2
-	err = tx.Save(product).Error
-	if err != nil {
+	if err := tx.Save(product).Error; err != nil {
 		tx.Rollback()
 		logger.Error("更新商品状态失败", zap.Error(err), zap.Uint64("product_id", productID))
-		return nil, nil, err
+		return nil, nil, util.NewBizError(util.ErrCodeProductUnavailable, "商品已被其他用户购买")
 	}
 
 	orderNo := util.GenerateOrderNo()
@@ -157,22 +162,20 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 		OrderTime:           &now,
 	}
 
-	err = tx.Create(order).Error
-	if err != nil {
+	if err := tx.Create(order).Error; err != nil {
 		tx.Rollback()
 		logger.Error("创建订单失败", zap.Error(err), zap.String("order_no", orderNo), zap.Uint64("buyer_id", buyerID))
 		return nil, nil, err
 	}
 
-	err = tx.Commit().Error
-	if err != nil {
+	if err := tx.Commit().Error; err != nil {
 		logger.Error("提交事务失败", zap.Error(err), zap.String("order_no", orderNo))
 		return nil, nil, err
 	}
 
-	// 更新商品详情缓存，清除列表缓存
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
+	ClearMyProductsCache(product.OwnerPhone)
 
 	ConvertOrderImageURLs(order)
 	return order, nil, nil

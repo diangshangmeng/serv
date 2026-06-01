@@ -242,17 +242,29 @@ func AppPublishProduct(productID uint64, ownerPhone string) error {
 		return util.NewBizError(util.ErrCodeProductStatusError, "商品状态不正确，只能上架未上架的商品")
 	}
 
+	// 价格验证：如果上次交易价格 > 0，则验证当前价格是否等于上次交易价格
+	if product.LastTransactionPrice > 0 && product.Price != product.LastTransactionPrice {
+		log.Printf("[AppPublishProduct] 价格被篡改，productID=%d, currentPrice=%d, lastTransactionPrice=%d", productID, product.Price, product.LastTransactionPrice)
+		return util.NewBizError(util.ErrCodeProductPriceTampered, "商品价格已被篡改，请重新设置")
+	}
+
+	// 如果验证通过，将价格减1元（首次上架不需要减价）
+	if product.LastTransactionPrice > 0 {
+		product.Price = product.Price - 1
+		log.Printf("[AppPublishProduct] 价格验证通过，减1元后上架，productID=%d, newPrice=%d", productID, product.Price)
+	}
+
 	product.Status = 1
 	product.PayTime = nil
 	product.LockReason = ""
 
 	if err := repository.UpdateProduct(product); err != nil {
 		log.Printf("[AppPublishProduct] 更新失败，productID=%d, error=%v", productID, err)
-		return err
+		return util.NewBizError(util.ErrCodeProductUnavailable, "商品已被其他用户操作")
 	}
 
 	log.Printf("[AppPublishProduct] 上架成功，productID=%d", productID)
-	
+
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
 	ClearMyProductsCache(ownerPhone)

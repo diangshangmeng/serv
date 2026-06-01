@@ -99,20 +99,22 @@ type PaymentCodeImage struct {
 
 type Product struct {
 	gorm.Model
-	Title           string
-	Description     string
-	Price           int64
-	DisplayImageID  uint
-	PaymentImageID  uint
-	OwnerID         uint
-	OwnerPhone      string
-	DisplayImageURL string `gorm:"size:2048"`
-	PaymentImageURL string `gorm:"size:2048"`
-	Status          int    `gorm:"default:0"`
-	PayTime         *time.Time
-	LockReason      string
-	CityID          uint `gorm:"index"`
-	City            City
+	Title                string
+	Description          string
+	Price                int64
+	DisplayImageID       uint
+	PaymentImageID       uint
+	OwnerID              uint
+	OwnerPhone           string
+	DisplayImageURL      string `gorm:"size:2048"`
+	PaymentImageURL      string `gorm:"size:2048"`
+	Status               int    `gorm:"default:0"`
+	PayTime              *time.Time
+	LockReason           string
+	CityID               uint   `gorm:"index"`
+	City                 City
+	Version              int    `gorm:"version;default:0"`
+	LastTransactionPrice int64  `gorm:"default:0"` // 上次交易价格（分），用于防篡改
 }
 
 func AutoMigrate() error {

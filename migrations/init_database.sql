@@ -183,10 +183,14 @@ CREATE TABLE IF NOT EXISTS `products` (
   `order_time` datetime(3) DEFAULT NULL COMMENT '下单时间',
   `pay_time` datetime(3) DEFAULT NULL COMMENT '支付时间',
   `lock_reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '锁定原因',
+  `city_id` bigint unsigned DEFAULT NULL COMMENT '城市ID',
+  `version` int DEFAULT '0' COMMENT '乐观锁版本号',
+  `last_transaction_price` bigint DEFAULT '0' COMMENT '上次交易价格（分），用于防篡改',
   PRIMARY KEY (`id`),
   KEY `idx_products_deleted_at` (`deleted_at`),
   KEY `idx_products_owner_id` (`owner_id`),
-  KEY `idx_products_status` (`status`)
+  KEY `idx_products_status` (`status`),
+  KEY `idx_products_city_id` (`city_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品表';
 
 -- ============================================

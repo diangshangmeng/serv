@@ -39,10 +39,11 @@ const (
 
 	ErrCodeImageNotFound     = 6001
 	ErrCodeImageAlreadyUsed  = 6002
-	ErrCodeProductNotFound     = 7001
-	ErrCodeProductNoPermission = 7002
-	ErrCodeProductUnavailable  = 7003
-	ErrCodeProductStatusError = 7004
+	ErrCodeProductNotFound        = 7001
+	ErrCodeProductNoPermission    = 7002
+	ErrCodeProductUnavailable      = 7003
+	ErrCodeProductStatusError      = 7004
+	ErrCodeProductPriceTampered    = 7005
 	ErrCodePaymentCodeImageNotFound = 8001
 )
 
