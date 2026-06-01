@@ -198,6 +198,15 @@ func UnlockProduct(productID uint64) error {
 func GetMyProducts(ownerPhone string, page int, pageSize int, cityID *uint) ([]*model.Product, int64, error) {
 	log.Printf("[GetMyProducts] 开始查询商品列表，ownerPhone=%s, page=%d, pageSize=%d", ownerPhone, page, pageSize)
 
+	cached, err := GetMyProductsFromCache(ownerPhone, page, pageSize, cityID)
+	if err == nil && cached != nil {
+		log.Printf("[GetMyProducts] 从缓存获取成功，ownerPhone=%s, total=%d", ownerPhone, cached.Total)
+		for _, product := range cached.List {
+			ConvertProductImageURLs(product)
+		}
+		return cached.List, cached.Total, nil
+	}
+
 	products, total, err := repository.GetProductsByOwnerPhone(ownerPhone, page, pageSize, cityID)
 	if err != nil {
 		log.Printf("[GetMyProducts] 查询失败，ownerPhone=%s, error=%v", ownerPhone, err)
@@ -207,6 +216,8 @@ func GetMyProducts(ownerPhone string, page int, pageSize int, cityID *uint) ([]*
 	for _, product := range products {
 		ConvertProductImageURLs(product)
 	}
+
+	_ = SetMyProductsToCache(products, total, ownerPhone, page, pageSize, cityID)
 
 	log.Printf("[GetMyProducts] 查询成功，ownerPhone=%s, total=%d", ownerPhone, total)
 	return products, total, nil
@@ -244,5 +255,6 @@ func AppPublishProduct(productID uint64, ownerPhone string) error {
 	
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
+	ClearMyProductsCache(ownerPhone)
 	return nil
 }
