@@ -111,6 +111,9 @@ func CloseExpiredOrders() error {
 		// 更新商品详情缓存，清除列表缓存
 		_ = SetProductDetailToCache(product)
 		ClearProductListCache()
+		// 清除卖家和买家的"我的商品"缓存
+		ClearMyProductsCache(product.OwnerPhone)
+		ClearMyProductsCache(order.BuyerPhone)
 	}
 
 	return nil
@@ -349,6 +352,8 @@ func ConfirmOrder(orderNo string, sellerPhone string) error {
 		tx.Rollback()
 		return err
 	}
+	// 记录原卖家手机号，用于清除其"我的商品"缓存
+	originalOwnerPhone := product.OwnerPhone
 	product.Status = 0
 	product.OwnerID = order.BuyerID
 	product.OwnerPhone = order.BuyerPhone
@@ -389,6 +394,10 @@ func ConfirmOrder(orderNo string, sellerPhone string) error {
 	// 更新商品详情缓存，清除列表缓存
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
+	// 清除原卖家的"我的商品"缓存（商品已不属于该卖家）
+	ClearMyProductsCache(originalOwnerPhone)
+	// 清除新买家的"我的商品"缓存（商品现在属于该买家）
+	ClearMyProductsCache(order.BuyerPhone)
 	
 	util.GetLogger().Info("ConfirmOrder - 确认订单成功",
 		util.StringField("order_no", orderNo),
@@ -453,6 +462,13 @@ func SellerCancelOrder(orderNo string, sellerPhone string) error {
 		zap.Time("expired_at", order.ExpiredAt))
 
 	tx.Commit()
+	
+	// 清除卖家和买家的"我的商品"缓存
+	ClearMyProductsCache(order.SellerPhone)
+	ClearMyProductsCache(order.BuyerPhone)
+	// 清除商品列表缓存
+	ClearProductListCache()
+	
 	util.GetLogger().Info("SellerCancelOrder - 卖家取消订单成功",
 		util.StringField("order_no", orderNo),
 		util.StringField("seller_phone", sellerPhone))
@@ -525,6 +541,9 @@ func CancelOrder(orderNo string) error {
 	// 更新商品详情缓存，清除列表缓存
 	_ = SetProductDetailToCache(product)
 	ClearProductListCache()
+	// 清除卖家和买家的"我的商品"缓存
+	ClearMyProductsCache(product.OwnerPhone)
+	ClearMyProductsCache(order.BuyerPhone)
 	return nil
 }
 
