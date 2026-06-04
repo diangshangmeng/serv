@@ -325,6 +325,7 @@ func AdminSellerConfirmOrder(orderNo string) error {
 		tx.Rollback()
 		return err
 	}
+	originalOwnerPhone := product.OwnerPhone
 	product.Status = 0
 	product.OwnerID = order.BuyerID
 	product.OwnerPhone = order.BuyerPhone
@@ -352,6 +353,13 @@ func AdminSellerConfirmOrder(orderNo string) error {
 	}
 
 	tx.Commit()
+	// 更新商品详情缓存，清除列表缓存
+	_ = SetProductDetailToCache(product)
+	ClearProductListCache()
+	// 清除原卖家的"我的商品"缓存（商品已不属于该卖家）
+	ClearMyProductsCache(originalOwnerPhone)
+	// 清除新买家的"我的商品"缓存（商品现在属于该买家）
+	ClearMyProductsCache(order.BuyerPhone)
 	log.Printf("[AdminSellerConfirmOrder] 管理员确认订单成功，order_no=%s", orderNo)
 	return nil
 }
