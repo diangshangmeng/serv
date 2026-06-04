@@ -8,6 +8,8 @@ import (
 	"voucher-platform/util"
 )
 
+const FAX_PRICE = 100 // 1元 = 100分
+
 func CreateProduct(product *model.Product, adminID uint, adminPhone string) error {
 	product.OwnerID = adminID
 	product.OwnerPhone = adminPhone
@@ -250,8 +252,8 @@ func AppPublishProduct(productID uint64, ownerPhone string) error {
 	}
 
 	// 如果验证通过，将价格减1元（首次上架不需要减价）
-	if product.LastTransactionPrice > 0 {
-		product.Price = product.Price - 1
+	if product.LastTransactionPrice > 0 && product.Price >= 100 {
+		product.Price = product.Price - FAX_PRICE
 		product.LastTransactionPrice = product.Price
 		log.Printf("[AppPublishProduct] 价格验证通过，减1元后上架，productID=%d, newPrice=%d", productID, product.Price)
 	}
