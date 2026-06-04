@@ -62,7 +62,7 @@ func LoadConfig() error {
 		SMSAccessKeyID:     getEnv("SMS_ACCESS_KEY_ID", ""),
 		SMSAccessKeySecret: getEnv("SMS_ACCESS_KEY_SECRET", ""),
 		ImageUploadPath:    getEnv("IMAGE_UPLOAD_PATH", "/uploads"),
-		MaxImageSize:       getEnvAsInt64("MAX_IMAGE_SIZE", 2097152),
+		MaxImageSize:       getEnvAsInt64("MAX_IMAGE_SIZE", 5242880),
 		LogLevel:           getEnv("LOG_LEVEL", "info"),
 		LogFilename:        getEnv("LOG_FILENAME", "./logs/app.log"),
 		LogMaxSize:         getEnvAsInt("LOG_MAX_SIZE", 100),
