@@ -6,11 +6,13 @@ import (
 	"voucher-platform/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func InitRouter(r *gin.Engine) {
 	imgURL := config.AppConfig.ImageUploadPath
 	r.Use(middleware.CORSMiddleware())
+	r.Use(middleware.MetricsMiddleware())
 
 	r.Static("/uploads", imgURL)
 
@@ -162,4 +164,6 @@ func InitRouter(r *gin.Engine) {
 			"status": "ok",
 		})
 	})
+
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
