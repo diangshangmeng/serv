@@ -130,7 +130,7 @@ func CreateProductOrder(productID uint64, buyerID uint64, buyerPhone string) (*m
 		return nil, nil, util.NewBizError(util.ErrCodeProductUnavailable, "商品不可购买")
 	}
 
-	if uint64(product.OwnerID) == buyerID {
+	if product.OwnerPhone == buyerPhone {
 		return nil, nil, util.NewBizError(util.ErrCodeCannotBuyOwn, "不能购买自己的商品")
 	}
 
